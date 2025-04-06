@@ -8,7 +8,7 @@
 <body>
     <?php
     $_servername='localhost:3307';
-    $database='ACC';
+    $database='ERP_ACC';
     $username='root';
     $password='';
     //create connection
