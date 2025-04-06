@@ -18,6 +18,7 @@ correo TEXT NOT NULL,
 contraseña VARCHAR(25) NOT NULL,
 id_rol INT NOT NULL, 
 id_departamento INT NOT NULL,
+fecha_ingreso datetime,
 CONSTRAINT fk_usuario_roles FOREIGN KEY (id_rol) REFERENCES Roles(id_rol),
 CONSTRAINT fk_usuario_depar FOREIGN KEY (id_departamento) REFERENCES departamento(id_departamento)
 );
@@ -88,4 +89,39 @@ CONSTRAINT fk_incapacidad FOREIGN KEY (id_incapacidad) REFERENCES incapacidad(id
 CONSTRAINT fk_deducciones FOREIGN KEY (id_deducciones) REFERENCES deducciones(id_deducciones),
 CONSTRAINT fk_percepcion FOREIGN KEY (id_percepcion) REFERENCES percepciones(id_percepcion)
 );
+
+INSERT INTO departamento (nombre_departamento) VALUES
+('Administración'),
+('Recursos Humanos'),
+('Tecnologías de la Información'),
+('Finanzas'),
+('Marketing'),
+('Ventas');
+
+INSERT INTO roles (roles) VALUES
+('Administrador'),                -- Administración
+('Gerente de RRHH'),             -- Recursos Humanos
+('Especialista TI'),             -- Tecnologías de la Información
+('Contador'),                    -- Finanzas
+('Analista de Marketing'),       -- Marketing
+('Ejecutivo de Ventas');         -- Ventas
+
+INSERT INTO usuario (nombre_usuario, correo, contraseña, id_rol, id_departamento,fecha_ingreso) VALUES
+('admin', 'admin@ACC.com', '12', 1, 1,'20230320 17:03:01'),
+('rrhh_gerente', 'rrhh@ACC.com', '12', 2, 2,'20230320 17:03:01'),
+('ti_user', 'ti@ACC.com', '12', 3, 3,'20230320 17:03:01'),
+('finanzas_cont', 'cont@ACC.com', '12', 4, 4,'20230320 17:03:01'),
+('mkt_analyst', 'mkt@ACC.com', '12', 5, 5,'20230320 17:03:01'),
+('ventas_exec', 'ventas@ACC.com', '12', 6, 6,'20230320 17:03:01');
+
+INSERT INTO persona (
+  id_usuario, nom_persona, apellido_paterno, apellido_materno, curp, rfc, 
+  codigo_postal, calle, num_ext, colonia, ciudad, telefono, sueldo, modo_Pago
+) VALUES
+(1, 'Carlos', 'Ramírez', 'López', 'CARR900101HDFLPL01', 'CARR9001011A1', '01000', 'Av Reforma', 101, 'Centro', 'CDMX', '5512345678', 50000.00, 'Cheque'),
+(2, 'Lucía', 'Martínez', 'González', 'LUMG850202MDFMZN02', 'LUMG8502022B2', '03800', 'Insurgentes Sur', 202, 'Napoles', 'CDMX', '5543219876', 35000.00, 'Efectivo'),
+(3, 'Miguel', 'Santos', 'Hernández', 'MISH920303HDFTRD03', 'MISH9203033C3', '04300', 'Cuauhtémoc', 303, 'Del Valle', 'CDMX', '5567894321', 40000.00, 'Tarjeta'),
+(4, 'Andrea', 'López', 'Ramírez', 'ANLR940404MDFRMR04', 'ANLR9404044D4', '06100', 'Álvaro Obregón', 404, 'Roma Norte', 'CDMX', '5523456789', 42000.00, 'Cheque'),
+(5, 'Diego', 'Hernández', 'Vega', 'DIHV960505HDFVGA05', 'DIHV9605055E5', '06700', 'Av Juárez', 505, 'Doctores', 'CDMX', '5576543210', 38000.00, 'Efectivo'),
+(6, 'Sofía', 'García', 'Núñez', 'SOGN970606MDFNZU06', 'SOGN9706066F6', '06900', 'Balderas', 606, 'Guerrero', 'CDMX', '5598765432', 37000.00, 'Tarjeta');
 
