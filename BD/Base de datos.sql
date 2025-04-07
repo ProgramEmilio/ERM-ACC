@@ -67,11 +67,13 @@ cuota_sindical NUMERIC(10,2) NOT NULL
 
 CREATE TABLE incapacidad(
 id_incapacidad INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+id_persona INT NOT NULL,
 fecha_inicio DATE NOT NULL,
 fecha_final DATE NOT NULL,
 total_dias INT NOT NULL,
 motivo VARCHAR(100) NOT NULL,
-estatus ENUM('Activo','Inactivo')
+estatus ENUM('Activo','Inactivo'),
+CONSTRAINT fk_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona)
 );
 
 CREATE TABLE nomina(
@@ -80,12 +82,8 @@ fecha_nomina DATE NOT NULL,
 periodo_inicio DATE NOT NULL,
 periodo_final DATE NOT NULL,
 dias_pagados NUMERIC(10,2) NOT NULL,
-id_persona INT NOT NULL,
-id_incapacidad INT NOT NULL,
 id_deducciones INT NOT NULL,
 id_percepcion INT NOT NULL,
-CONSTRAINT fk_persona FOREIGN KEY (id_persona) REFERENCES persona(id_persona),
-CONSTRAINT fk_incapacidad FOREIGN KEY (id_incapacidad) REFERENCES incapacidad(id_incapacidad),
 CONSTRAINT fk_deducciones FOREIGN KEY (id_deducciones) REFERENCES deducciones(id_deducciones),
 CONSTRAINT fk_percepcion FOREIGN KEY (id_percepcion) REFERENCES percepciones(id_percepcion)
 );

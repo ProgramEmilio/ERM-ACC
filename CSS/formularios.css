@@ -133,6 +133,7 @@
 .form_reg_usuario input[type="text"],
 .form_reg_usuario input[type="number"],
 .form_reg_usuario input[type="password"],
+.form_reg_usuario input[type="date"],
 .form_reg_usuario input[type="email"],
 .form_reg_usuario textarea,
 .form_reg_usuario select {
