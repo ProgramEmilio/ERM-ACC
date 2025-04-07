@@ -11,47 +11,19 @@ $id_rol = $_SESSION['id_rol'];
 // Definir opciones de menú por rol
 $menus = [
     1 => [ // Administrador
-        "Cliente" => "../../Home/inicio.php",
         "Usuario" => [
             "Usuario" => "../../Usuarios/usuario.php",
             "Registro" => "../../Usuarios/Registro/Registro_Usuario.php"
         ],
-        "Proveedor" => "../../Compras/Cotizacion/Cotizar.php",
-        "Ventas" => [
-        "Detalle" => "../../Venta/Detalle_venta.php",
-        "Bitacora" => "../../Venta/Bitacora.php"
+        "Incapacidad" =>[
+            "Incapacidad" => "../../Incapacidad/incapacidades.php",
+            "Registro" => "../../Incapacidad/Registro/Registro_Incapacidades.php"
         ],
-        "Compras" => [
-            "Solicitar" => "../../Compras/Solicitar/Solicitar_Compra.php",
-            "Aprobar" => "../../Compras/Aprobar/Aprobar_Compra.php",
-            "Historial" => "../../Compras/Reporte/Reporte_Compras.php"
-        ],
-        "Inventario" => "../../Inventario/Inventario.php",
-        "Distribución" => "../../Distribucion/Distribucion.php",
-        "Producción" => [
-        "Producción" => "../../Produccion/pro.php",
-        "Productor" => "../../Produccion/productor.php"
-    ]],
-    2 => ["Catalogo" => [
-        "Catalogo" => "../../Home/inicio.php",
-        "Pedio" => "../Venta/Detalle_venta.php"
-    ]],
-    3 => ["Proveedor" => "../../../Compras/Cotizacion/Cotizar.php"],
-    4 => ["Compras" => [
-        "Solicitar" => "../../Compras/Solicitar/Solicitar_Compra.php",
-        "Aprobar" => "../../../Compras/Aprobar/Aprobar_Compra.php",
-        "Historial" => "../../Compras/Reporte/Reporte_Compras.php"
-    ]],
-    5 => ["Ventas" => [
-        "Detalle" => "../../Venta/Detalle_venta.php",
-        "Bitacora" => "../../Venta/Bitacora.php"
-        ]],
-    6 => ["Producción" => [
-        "Producción" => "../../Produccion/pro.php",
-        "Productor" => "../../Produccion/productor.php",
-    ]], 
-    7 => ["Distribución" => "../../Distribucion/Distribucion.php"], // Distribuidor solo ve distribución
-    8 => ["../../Inventario/Inventario.php" => "#"] // Responsable stock solo ve inventario
+        "Nomina" =>[
+            "Nomina" => "../../Nomina/Nomina.php",
+            "Registro" => "../../Nomina/Registro_N/Registro_Nomina.php"
+        ]
+    ]
 ];
 include('CerrarSesion.php');
 ?>
