@@ -38,10 +38,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Redirigir según el rol del usuario
                 switch ($id_rol) {
                     case 1: // Administrador
-                        header("Location: ../Nomina/Nomina.php.php");
+                        header("Location: ../Nomina/Nomina.php");
                         break;
                     case 2: // Cliente
-                        header("Location: ../Home/inicio.php");
+                        header("Location: ../Nomina/Nomina.php");
                         break;
                     case 3: // Proveedor
                         header("Location: ../Compras/Cotizacion/Cotizar.php");
