@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Redirigir según el rol del usuario
                 switch ($id_rol) {
                     case 1: // Administrador
-                        header("Location: ../Inicio/inicio.php");
+                        header("Location: ../Nomina/Nomina.php.php");
                         break;
                     case 2: // Cliente
                         header("Location: ../Home/inicio.php");
@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         header("Location: ../Inventario/Inventario.php");
                         break;
                     default:
-                        header("Location: ../Home/inicio.php"); // Si el rol no existe, ir a una página por defecto
+                        header("Location: ../Nomina/Nomina.php"); // Si el rol no existe, ir a una página por defecto
                         break;
                 }
                 exit();
