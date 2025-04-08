@@ -36,8 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $fecha_nomina = date("Y-m-d");
     $periodo_final = date('Y-m-d', strtotime($periodo_inicio . ' + 14 days'));
 
-    // Puntualidad = (dias_trabajados * sueldo_base) / 15
-    $puntualidad = ($dias_trabajados * $sueldo_base) / 15;
+    // Puntualidad = (dias_pagados * sueldo_base) / 15
+    $puntualidad = ($dias_pagados * $sueldo_base) / 15;
 
     // Calcular percepciones
     $asistencia = $puntualidad * 0.1;
