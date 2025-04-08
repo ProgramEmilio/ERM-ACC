@@ -26,6 +26,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Total días pagados
     $dias_pagados = $dias_trabajados + $dias_justificados;
 
+    // ⚠️ Validación: días pagados no deben superar 15
+    if ($dias_pagados > 15) {
+        echo "<script>alert('Error: La suma de días trabajados e incapacidades no puede superar 15 días.'); window.history.back();</script>";
+        exit;
+    }
+
     // Fecha actual y final
     $fecha_nomina = date("Y-m-d");
     $periodo_final = date('Y-m-d', strtotime($periodo_inicio . ' + 14 days'));
@@ -33,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Puntualidad = (dias_trabajados * sueldo_base) / 15
     $puntualidad = ($dias_trabajados * $sueldo_base) / 15;
 
-    // Calcular percepciones basadas en puntualidad
+    // Calcular percepciones
     $asistencia = $puntualidad * 0.1;
     $bono = $puntualidad * 0.05;
     $vales = $puntualidad * 0.03;
@@ -41,14 +47,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $vacaciones = $puntualidad * 0.06;
     $prima_antiguedad = $puntualidad * 0.02;
 
-    // Insertar en percepciones
     $stmt = $conn->prepare("INSERT INTO percepciones (sueldo_base, puntualidad, asistencia, bono, vales_despensa, compensaciones, vacaciones, prima_antiguedad) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("dddddddd", $sueldo_base, $puntualidad, $asistencia, $bono, $vales, $compensaciones, $vacaciones, $prima_antiguedad);
     $stmt->execute();
     $id_percepcion = $stmt->insert_id;
     $stmt->close();
 
-    // Calcular deducciones basadas en puntualidad
+    // Calcular deducciones
     $isr = $puntualidad * 0.12;
     $imss = $puntualidad * 0.08;
     $caja = $puntualidad * 0.05;
@@ -57,7 +62,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $fonacot = $puntualidad * 0.03;
     $sindicato = $puntualidad * 0.01;
 
-    // Insertar en deducciones
     $stmt = $conn->prepare("INSERT INTO deducciones (isr, imss, caja_ahorro, prestamos, infonavit, fonacot, cuota_sindical) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ddddddd", $isr, $imss, $caja, $prestamos, $infonavit, $fonacot, $sindicato);
     $stmt->execute();
