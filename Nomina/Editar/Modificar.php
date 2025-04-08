@@ -5,14 +5,17 @@ include('../../Nav/header2.php');
 $id_nomina = $_GET['id_nomina'];
 
 // Obtener datos actuales de la nómina, percepciones y deducciones
-$sql = "SELECT n.*, p.*, d.*, per.sueldo, per.nom_persona, per.apellido_paterno, per.apellido_materno
+$sql = "SELECT n.*, d.*, p.*, per.nom_persona, per.apellido_paterno, per.apellido_materno
         FROM nomina n
         JOIN deducciones d ON n.id_deducciones = d.id_deducciones
         JOIN percepciones p ON n.id_percepcion = p.id_percepcion
         JOIN persona per ON n.id_persona = per.id_persona
-        WHERE n.id_nomina = $id_nomina";
+        WHERE n.id_nomina = ?";
 
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id_nomina);
+$stmt->execute();
+$result = $stmt->get_result();
 $data = $result->fetch_assoc();
 ?>
 
@@ -20,7 +23,6 @@ $data = $result->fetch_assoc();
 <h1 class="titulo">Modificar Nómina</h1>
 
 <form class="form_reg_usuario" action="Editar_N.php" method="POST">
-    <!-- ID NOMINA (oculto) -->
     <input type="hidden" name="id_nomina" value="<?= $data['id_nomina'] ?>">
     <input type="hidden" name="id_percepcion" value="<?= $data['id_percepcion'] ?>">
     <input type="hidden" name="id_deducciones" value="<?= $data['id_deducciones'] ?>">
@@ -38,8 +40,8 @@ $data = $result->fetch_assoc();
     <label for="periodo_final">Periodo Final:</label>
     <input type="date" name="periodo_final" value="<?= $data['periodo_final'] ?>" required><br><br>
 
-    <label for="dias_pagados">Días Pagados:</label>
-    <input type="number" step="0.01" name="dias_pagados" value="<?= $data['dias_pagados'] ?>" required><br><br>
+    <label for="dias_total">Días Pagados:</label>
+    <input type="number" step="0.01" name="dias_total" value="<?= $data['dias_total'] ?>" required><br><br>
 
     <h2>Percepciones</h2>
     <label>Sueldo Base:</label>

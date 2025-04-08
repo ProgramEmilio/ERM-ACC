@@ -7,32 +7,34 @@ if (!$conn) {
     die("Error de conexión: " . mysqli_connect_error());
 }
 
-// Consulta SQL que une nomina con persona, percepciones y deducciones
-$sql = "SELECT 
-            nomina.id_nomina,
-            persona.nom_persona AS Nombre,
-            persona.apellido_paterno AS Apellido_Paterno,
-            persona.apellido_materno AS Apellido_Materno,
-            nomina.fecha_nomina,
-            nomina.periodo_inicio,
-            nomina.periodo_final,
-            nomina.dias_pagados,
+// Consulta SQL actualizada (asegúrate que los campos existen en tu nueva BD)
+$sql = "
+    SELECT 
+        n.id_nomina,
+        p.nom_persona AS Nombre,
+        p.apellido_paterno AS Apellido_Paterno,
+        p.apellido_materno AS Apellido_Materno,
+        n.fecha_nomina,
+        n.periodo_inicio,
+        n.periodo_final,
+        n.dias_total as dias_pagados,
 
-            -- Sumatoria de percepciones
-            (percepciones.sueldo_base + percepciones.puntualidad + percepciones.asistencia + 
-             IFNULL(percepciones.bono, 0) + IFNULL(percepciones.vales_despensa, 0) + 
-             IFNULL(percepciones.compensaciones, 0) + IFNULL(percepciones.vacaciones, 0) + 
-             IFNULL(percepciones.prima_antiguedad, 0)) AS total_percepciones,
+        -- Percepciones
+        (pr.sueldo_base + pr.puntualidad + pr.asistencia + 
+         IFNULL(pr.bono, 0) + IFNULL(pr.vales_despensa, 0) + 
+         IFNULL(pr.compensaciones, 0) + IFNULL(pr.vacaciones, 0) + 
+         IFNULL(pr.prima_antiguedad, 0)) AS total_percepciones,
 
-            -- Sumatoria de deducciones
-            (deducciones.isr + deducciones.imss + deducciones.caja_ahorro + 
-             deducciones.prestamos + deducciones.infonavit + 
-             deducciones.fonacot + deducciones.cuota_sindical) AS total_deducciones
+        -- Deducciones
+        (d.isr + d.imss + d.caja_ahorro + 
+         d.prestamos + d.infonavit + 
+         d.fonacot + d.cuota_sindical) AS total_deducciones
 
-        FROM nomina
-        JOIN persona ON nomina.id_persona = persona.id_persona
-        JOIN percepciones ON nomina.id_percepcion = percepciones.id_percepcion
-        JOIN deducciones ON nomina.id_deducciones = deducciones.id_deducciones";
+    FROM nomina n
+    INNER JOIN persona p ON n.id_persona = p.id_persona
+    INNER JOIN percepciones pr ON n.id_percepcion = pr.id_percepcion
+    INNER JOIN deducciones d ON n.id_deducciones = d.id_deducciones
+";
 
 $result = $conn->query($sql);
 
@@ -75,8 +77,8 @@ if (!$result) {
                     <td><?= htmlspecialchars($fila['dias_pagados']) ?></td>
                     <td>$<?= number_format($fila['total_percepciones'], 2) ?></td>
                     <td>$<?= number_format($fila['total_deducciones'], 2) ?></td>
-                    <td><a href='Editar/Modificar.php?id_nomina=<?= htmlspecialchars($fila['id_nomina']) ?>' class='editar'>Editar</a></td>
-                    <td><a href='Eliminar_N/Eliminar_N.php?id_nomina=<?= htmlspecialchars($fila['id_nomina']) ?>' class='eliminar'>Eliminar</a></td>
+                    <td><a href='Editar/Modificar.php?id_nomina=<?= urlencode($fila['id_nomina']) ?>' class='editar'>Editar</a></td>
+                    <td><a href='Eliminar_N/Eliminar_N.php?id_nomina=<?= urlencode($fila['id_nomina']) ?>' class='eliminar' onclick="return confirm('¿Estás seguro de eliminar esta nómina?');">Eliminar</a></td>
                 </tr>
             <?php endwhile; ?>
         </tbody>

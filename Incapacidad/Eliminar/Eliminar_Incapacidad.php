@@ -10,7 +10,7 @@ if (isset($_GET['id_incapacidad'])) {
 
     if (mysqli_query($conn, $sql)) {
         // Redirigir de nuevo a la lista con mensaje (opcional)
-        header("Location: ../ListaIncapacidades.php?mensaje=eliminado");
+        header("Location: ../Incapacidades.php?mensaje=eliminado");
         exit();
     } else {
         echo "Error al eliminar el registro: " . mysqli_error($conn);

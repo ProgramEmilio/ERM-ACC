@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         // Redirigir con éxito
-        header("Location: ../ListaIncapacidades.php?mensaje=actualizado");
+        header("Location: ../Incapacidades.php?mensaje=actualizado");
         exit();
     } else {
         echo "Error al actualizar: " . $stmt->error;

@@ -82,13 +82,16 @@ id_persona INT NOT NULL,
 fecha_nomina DATE NOT NULL,
 periodo_inicio DATE NOT NULL,
 periodo_final DATE NOT NULL,
-dias_pagados NUMERIC(10,2) NOT NULL,
+dias_trabajados TINYINT NOT NULL DEFAULT 0,
+dias_justificados TINYINT NOT NULL DEFAULT 0,
+dias_total NUMERIC(10,2) NOT NULL,
 id_deducciones INT NOT NULL,
 id_percepcion INT NOT NULL,
 CONSTRAINT fk_persona_nomina FOREIGN KEY (id_persona) REFERENCES persona(id_persona),
 CONSTRAINT fk_deducciones FOREIGN KEY (id_deducciones) REFERENCES deducciones(id_deducciones),
 CONSTRAINT fk_percepcion FOREIGN KEY (id_percepcion) REFERENCES percepciones(id_percepcion)
 );
+
 
 INSERT INTO departamento (nombre_departamento) VALUES
 ('Administración'),

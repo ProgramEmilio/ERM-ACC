@@ -1,65 +1,80 @@
 <?php
 include('../../BD/ConexionBD.php');
 
-// Verifica si llegaron los datos requeridos
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $id_persona = $_POST['id_persona'];
+    $periodo_inicio = $_POST['periodo_inicio'];
+    $dias_trabajados = (int)$_POST['dias_trabajados'];
 
-    // 1. Insertar percepciones
-    $sql_percepciones = "INSERT INTO percepciones (sueldo_base, puntualidad, asistencia, bono, vales_despensa, compensaciones, vacaciones, prima_antiguedad)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt1 = $conn->prepare($sql_percepciones);
-    $stmt1->bind_param("dddddddd",
-        $_POST['sueldo_base'],
-        $_POST['puntualidad'],
-        $_POST['asistencia'],
-        $_POST['bono'],
-        $_POST['vales_despensa'],
-        $_POST['compensaciones'],
-        $_POST['vacaciones'],
-        $_POST['prima_antiguedad']
-    );
-    $stmt1->execute();
-    $id_percepcion = $conn->insert_id;
-    $stmt1->close();
+    // Obtener sueldo base
+    $stmt = $conn->prepare("SELECT sueldo FROM persona WHERE id_persona = ?");
+    $stmt->bind_param("i", $id_persona);
+    $stmt->execute();
+    $stmt->bind_result($sueldo_base);
+    $stmt->fetch();
+    $stmt->close();
 
-    // 2. Insertar deducciones
-    $sql_deducciones = "INSERT INTO deducciones (isr, imss, caja_ahorro, prestamos, infonavit, fonacot, cuota_sindical)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $stmt2 = $conn->prepare($sql_deducciones);
-    $stmt2->bind_param("ddddddd",
-        $_POST['isr'],
-        $_POST['imss'],
-        $_POST['caja_ahorro'],
-        $_POST['prestamos'],
-        $_POST['infonavit'],
-        $_POST['fonacot'],
-        $_POST['cuota_sindical']
-    );
-    $stmt2->execute();
-    $id_deducciones = $conn->insert_id;
-    $stmt2->close();
+    // Calcular días justificados (sumar incapacidades activas en el período)
+    $stmt = $conn->prepare("SELECT SUM(total_dias) FROM incapacidad WHERE id_persona = ? AND estatus = 'Activo'");
+    $stmt->bind_param("i", $id_persona);
+    $stmt->execute();
+    $stmt->bind_result($dias_justificados);
+    $stmt->fetch();
+    $stmt->close();
+    $dias_justificados = $dias_justificados ?: 0;
 
-    // 3. Insertar nómina (con id_persona ahora)
-    $sql_nomina = "INSERT INTO nomina (id_persona, fecha_nomina, periodo_inicio, periodo_final, dias_pagados, id_deducciones, id_percepcion)
-    VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $stmt3 = $conn->prepare($sql_nomina);
-    $stmt3->bind_param("isssddd",
-    $_POST['id_persona'],
-    $_POST['fecha_nomina'],
-    $_POST['periodo_inicio'],
-    $_POST['periodo_final'],
-    $_POST['dias_pagados'],
-    $id_deducciones,
-    $id_percepcion
-    );
-    $stmt3->execute();
-    $stmt3->close();
+    // Total días pagados
+    $dias_pagados = $dias_trabajados + $dias_justificados;
 
+    // Fecha actual y final
+    $fecha_nomina = date("Y-m-d");
+    $periodo_final = date('Y-m-d', strtotime($periodo_inicio . ' + 14 days'));
 
-    echo "<script>alert('Nómina registrada correctamente'); window.location.href='../Nomina.php';</script>";
-} else {
-    echo "Error en el envío del formulario.";
+    // Puntualidad = (dias_trabajados * sueldo_base) / 15
+    $puntualidad = ($dias_trabajados * $sueldo_base) / 15;
+
+    // Calcular percepciones basadas en puntualidad
+    $asistencia = $puntualidad * 0.1;
+    $bono = $puntualidad * 0.05;
+    $vales = $puntualidad * 0.03;
+    $compensaciones = $puntualidad * 0.07;
+    $vacaciones = $puntualidad * 0.06;
+    $prima_antiguedad = $puntualidad * 0.02;
+
+    // Insertar en percepciones
+    $stmt = $conn->prepare("INSERT INTO percepciones (sueldo_base, puntualidad, asistencia, bono, vales_despensa, compensaciones, vacaciones, prima_antiguedad) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("dddddddd", $sueldo_base, $puntualidad, $asistencia, $bono, $vales, $compensaciones, $vacaciones, $prima_antiguedad);
+    $stmt->execute();
+    $id_percepcion = $stmt->insert_id;
+    $stmt->close();
+
+    // Calcular deducciones basadas en puntualidad
+    $isr = $puntualidad * 0.12;
+    $imss = $puntualidad * 0.08;
+    $caja = $puntualidad * 0.05;
+    $prestamos = $puntualidad * 0.04;
+    $infonavit = $puntualidad * 0.06;
+    $fonacot = $puntualidad * 0.03;
+    $sindicato = $puntualidad * 0.01;
+
+    // Insertar en deducciones
+    $stmt = $conn->prepare("INSERT INTO deducciones (isr, imss, caja_ahorro, prestamos, infonavit, fonacot, cuota_sindical) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ddddddd", $isr, $imss, $caja, $prestamos, $infonavit, $fonacot, $sindicato);
+    $stmt->execute();
+    $id_deduccion = $stmt->insert_id;
+    $stmt->close();
+
+    // Insertar en nómina
+    $stmt = $conn->prepare("INSERT INTO nomina (id_persona, fecha_nomina, periodo_inicio, periodo_final, dias_trabajados, dias_justificados, dias_total, id_deducciones, id_percepcion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issssiiii", $id_persona, $fecha_nomina, $periodo_inicio, $periodo_final, $dias_trabajados, $dias_justificados, $dias_pagados, $id_deduccion, $id_percepcion);
+
+    if ($stmt->execute()) {
+        echo "<script>alert('Nómina registrada correctamente.'); window.location.href='../Nomina.php';</script>";
+    } else {
+        echo "Error al registrar nómina: " . $conn->error;
+    }
+
+    $stmt->close();
+    $conn->close();
 }
-
-$conn->close();
 ?>
