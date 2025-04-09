@@ -1,6 +1,6 @@
 <?php
-require('../libs/fpdf.php');
-include('../BD/ConexionBD.php');
+require('../../libs/fpdf.php');
+include('../../BD/ConexionBD.php');
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id_nomina'])) {
     $id_nomina = $_POST['id_nomina'];
@@ -65,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id_nomina'])) {
     $pdf->Cell(95, 8, utf8_decode('Días Pagados: ' . $datos['dias_total']), 0, 1);
     $pdf->Ln(5);
     // Percepciones y deducciones
-    $percepciones = ['sueldo_base', 'puntualidad', 'asistencia', 'bono', 'vales_despensa', 'compensaciones', 'vacaciones', 'prima_antiguedad'];
+    $percepciones = ['sueldo_base', 'puntualidad', 'asistencia', 'bono', 'vales_despensa', 'compensaciones', 'prima_antiguedad'];
     $deducciones = ['isr', 'imss', 'caja_ahorro', 'prestamos', 'infonavit', 'fonacot', 'cuota_sindical'];
 
     $pdf->SetFont('Arial', 'B', 12);

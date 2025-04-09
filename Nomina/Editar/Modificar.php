@@ -2,112 +2,163 @@
 include('../../BD/ConexionBD.php');
 include('../../Nav/header2.php');
 
-$id_nomina = $_GET['id_nomina'];
+// Obtener ID desde URL
+$id_nomina = $_GET['id_nomina'] ?? null;
+if (!$id_nomina) {
+    echo "ID de nómina no proporcionado.";
+    exit;
+}
 
-// Obtener datos actuales de la nómina, percepciones y deducciones
-$sql = "SELECT n.*, p.*, d.*, per.sueldo, per.nom_persona, per.apellido_paterno, per.apellido_materno
+// Obtener datos de nómina, persona, percepciones y deducciones
+$sql = "SELECT n.*, p.nom_persona, p.apellido_paterno, p.apellido_materno, p.sueldo,
+               per.*, d.*
         FROM nomina n
-        JOIN deducciones d ON n.id_deducciones = d.id_deducciones
-        JOIN percepciones p ON n.id_percepcion = p.id_percepcion
-        JOIN persona per ON n.id_persona = per.id_persona
-        WHERE n.id_nomina = $id_nomina";
-
-$result = $conn->query($sql);
+        INNER JOIN persona p ON n.id_persona = p.id_persona
+        INNER JOIN percepciones per ON n.id_percepcion = per.id_percepcion
+        INNER JOIN deducciones d ON n.id_deducciones = d.id_deducciones
+        WHERE n.id_nomina = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id_nomina);
+$stmt->execute();
+$result = $stmt->get_result();
 $data = $result->fetch_assoc();
+
+if (!$data) {
+    echo "Registro de nómina no encontrado.";
+    exit;
+}
 ?>
 
-<body>
 <h1 class="titulo">Modificar Nómina</h1>
 
 <form class="form_reg_usuario" action="Editar_N.php" method="POST">
-    <!-- IDs ocultos -->
     <input type="hidden" name="id_nomina" value="<?= $data['id_nomina'] ?>">
-    <input type="hidden" name="id_percepcion" value="<?= $data['id_percepcion'] ?>">
-    <input type="hidden" name="id_deducciones" value="<?= $data['id_deducciones'] ?>">
+    <input type="hidden" id="sueldo_base_oculto" value="<?= $data['sueldo'] ?>">
 
-    <h2>Datos de Nómina</h2>
     <label>Empleado:</label>
     <input type="text" value="<?= $data['nom_persona'] . ' ' . $data['apellido_paterno'] . ' ' . $data['apellido_materno'] ?>" readonly><br><br>
 
-    <label for="fecha_nomina">Fecha de Nómina:</label>
-    <input type="date" name="fecha_nomina" value="<?= $data['fecha_nomina'] ?>" required><br><br>
+    <label>Fecha Nómina:</label>
+    <input type="date" name="fecha_nomina" value="<?= $data['fecha_nomina'] ?>" readonly><br><br>
 
     <label for="periodo_inicio">Periodo Inicio:</label>
-    <input type="date" name="periodo_inicio" value="<?= $data['periodo_inicio'] ?>" required><br><br>
+    <input type="date" name="periodo_inicio" id="periodo_inicio" value="<?= $data['periodo_inicio'] ?>" required onchange="actualizarPeriodoFinal()"><br><br>
 
     <label for="periodo_final">Periodo Final:</label>
-    <input type="date" name="periodo_final" value="<?= $data['periodo_final'] ?>" required><br><br>
-
-    <label for="dias_trabajados">Días Trabajados:</label>
-    <input type="number" step="0.01" name="dias_trabajados" value="<?= $data['dias_trabajados'] ?>" required><br><br>
+    <input type="date" name="periodo_final" id="periodo_final" value="<?= $data['periodo_final'] ?>" readonly><br><br>
 
     <label for="dias_justificados">Días Justificados:</label>
-    <input type="number" step="0.01" name="dias_justificados" value="<?= $data['dias_justificados'] ?>" required><br><br>
+    <input type="number" name="dias_justificados" id="dias_justificados" value="<?= $data['dias_justificados'] ?>" readonly><br><br>
 
-    <h2>Percepciones</h2>
-    <label>Sueldo Base:</label>
-    <input type="number" name="sueldo_base" step="0.01" value="<?= $data['sueldo_base'] ?>" readonly><br><br>
+    <label for="dias_pagados">Días Trabajados:</label>
+    <select name="dias_trabajados" id="dias_trabajados" required onchange="actualizarDatos()">
+        <option value="">Selecciona días</option>
+        <?php for ($i = 1; $i <= 15; $i++): ?>
+            <option value="<?= $i ?>" <?= $data['dias_trabajados'] == $i ? 'selected' : '' ?>><?= $i ?></option>
+        <?php endfor; ?>
+    </select><br><br>
 
-    <label>Puntualidad:</label>
-    <input type="number" step="0.01" name="puntualidad" value="<?= $data['puntualidad'] ?>" required><br><br>
+    <label for="dias_total">Total Días (máx 15):</label>
+    <input type="text" name="dias_total" id="dias_total" value="<?= $data['dias_total'] ?>" readonly><br><br>
 
-    <label>Asistencia:</label>
-    <input type="number" step="0.01" name="asistencia" value="<?= $data['asistencia'] ?>" required><br><br>
+    <fieldset>
+        <h2>Percepciones</h2>
+        <label>Sueldo Base:</label>
+        <input type="text" id="sueldo_base" name="sueldo_base" value="<?= $data['sueldo_base'] ?>" readonly><br>
 
-    <label>Bono:</label>
-    <input type="number" step="0.01" name="bono" value="<?= $data['bono'] ?>"><br><br>
+        <label>Puntualidad:</label>
+        <input type="text" id="puntualidad" name="puntualidad" value="<?= $data['puntualidad'] ?>" readonly><br>
 
-    <label>Vales de Despensa:</label>
-    <input type="number" step="0.01" name="vales_despensa" value="<?= $data['vales_despensa'] ?>"><br><br>
+        <label>Asistencia:</label>
+        <input type="text" name="asistencia" value="<?= $data['asistencia'] ?>" readonly><br>
 
-    <label>Compensaciones:</label>
-    <input type="number" step="0.01" name="compensaciones" value="<?= $data['compensaciones'] ?>"><br><br>
+        <label>Bono:</label>
+        <input type="text" name="bono" value="<?= $data['bono'] ?>" readonly><br>
 
-    <label>Vacaciones:</label>
-    <input type="number" step="0.01" name="vacaciones" value="<?= $data['vacaciones'] ?>"><br><br>
+        <label>Vales Despensa:</label>
+        <input type="text" name="vales_despensa" value="<?= $data['vales_despensa'] ?>" readonly><br>
 
-    <label>Prima de Antigüedad:</label>
-    <input type="number" step="0.01" name="prima_antiguedad" value="<?= $data['prima_antiguedad'] ?>"><br><br>
+        <label>Compensaciones:</label>
+        <input type="text" name="compensaciones" value="<?= $data['compensaciones'] ?>" readonly><br>
 
-    <h2>Deducciones</h2>
-    <label>ISR:</label>
-    <input type="number" step="0.01" name="isr" value="<?= $data['isr'] ?>" required><br><br>
+        <label>Prima Antigüedad:</label>
+        <input type="text" name="prima_antiguedad" value="<?= $data['prima_antiguedad'] ?>" readonly><br>
+    </fieldset>
 
-    <label>IMSS:</label>
-    <input type="number" step="0.01" name="imss" value="<?= $data['imss'] ?>" required><br><br>
+    <fieldset>
+        <h2>Deducciones</h2>
+        <label>ISR:</label>
+        <input type="text" name="isr" value="<?= $data['isr'] ?>" readonly><br>
 
-    <label>Caja de Ahorro:</label>
-    <input type="number" step="0.01" name="caja_ahorro" value="<?= $data['caja_ahorro'] ?>" required><br><br>
+        <label>IMSS:</label>
+        <input type="text" name="imss" value="<?= $data['imss'] ?>" readonly><br>
 
-    <label>Préstamos:</label>
-    <input type="number" step="0.01" name="prestamos" value="<?= $data['prestamos'] ?>" required><br><br>
+        <label>Caja Ahorro:</label>
+        <input type="text" name="caja_ahorro" value="<?= $data['caja_ahorro'] ?>" readonly><br>
 
-    <label>INFONAVIT:</label>
-    <input type="number" step="0.01" name="infonavit" value="<?= $data['infonavit'] ?>" required><br><br>
+        <label>Préstamos:</label>
+        <input type="text" name="prestamos" value="<?= $data['prestamos'] ?>" readonly><br>
 
-    <label>FONACOT:</label>
-    <input type="number" step="0.01" name="fonacot" value="<?= $data['fonacot'] ?>" required><br><br>
+        <label>INFONAVIT:</label>
+        <input type="text" name="infonavit" value="<?= $data['infonavit'] ?>" readonly><br>
 
-    <label>Cuota Sindical:</label>
-    <input type="number" step="0.01" name="cuota_sindical" value="<?= $data['cuota_sindical'] ?>" required><br><br>
+        <label>FONACOT:</label>
+        <input type="text" name="fonacot" value="<?= $data['fonacot'] ?>" readonly><br>
 
-    <input type="submit" value="Actualizar Nómina">
+        <label>Cuota Sindical:</label>
+        <input type="text" name="cuota_sindical" value="<?= $data['cuota_sindical'] ?>" readonly><br>
+    </fieldset>
+
+    <input type="submit" value="Guardar Cambios">
 </form>
 
-<a href="../Nomina.php" class="regresar">Regresar</a>
+<a href="../Usuario.php" class="regresar">Regresar</a>
 
 <script>
-document.querySelector('form').addEventListener('submit', function (e) {
-    const diasTrabajados = parseFloat(document.querySelector('[name="dias_trabajados"]').value) || 0;
-    const diasJustificados = parseFloat(document.querySelector('[name="dias_justificados"]').value) || 0;
-    const diasPagados = diasTrabajados + diasJustificados;
-
-    if (diasPagados > 15) {
-        alert("Los días pagados no pueden ser mayores a 15.\nActualmente tienes: " + diasPagados);
-        e.preventDefault();
+function actualizarPeriodoFinal() {
+    const inicio = document.getElementById('periodo_inicio').value;
+    if (inicio) {
+        const fechaInicio = new Date(inicio);
+        fechaInicio.setDate(fechaInicio.getDate() + 13);
+        document.getElementById('periodo_final').value = fechaInicio.toISOString().split('T')[0];
     }
-});
+}
+
+function actualizarDatos() {
+    const sueldoBase = parseFloat(document.getElementById("sueldo_base_oculto").value) || 0;
+    const dias = parseInt(document.getElementById("dias_trabajados").value) || 0;
+    const justificados = parseInt(document.getElementById("dias_justificados").value) || 0;
+    const total = dias + justificados;
+
+    if (total > 15) {
+        alert("La suma de días trabajados y justificados no puede exceder 15.");
+        document.getElementById("dias_trabajados").value = "";
+        document.getElementById("dias_total").value = "";
+        return;
+    }
+
+    document.getElementById("dias_total").value = total;
+
+    const puntualidad = (total * sueldoBase / 15).toFixed(2);
+    document.getElementById("sueldo_base").value = sueldoBase.toFixed(2);
+    document.getElementById("puntualidad").value = puntualidad;
+
+    const p = parseFloat(puntualidad) || 0;
+
+    document.getElementsByName("asistencia")[0].value = (p * 0.10).toFixed(2);
+    document.getElementsByName("bono")[0].value = (p * 0.05).toFixed(2);
+    document.getElementsByName("vales_despensa")[0].value = (p * 0.08).toFixed(2);
+    document.getElementsByName("compensaciones")[0].value = (p * 0.03).toFixed(2);
+    document.getElementsByName("prima_antiguedad")[0].value = (p * 0.02).toFixed(2);
+
+    document.getElementsByName("isr")[0].value = (p * 0.16).toFixed(2);
+    document.getElementsByName("imss")[0].value = (p * 0.02375).toFixed(2);
+    document.getElementsByName("caja_ahorro")[0].value = (p * 0.07).toFixed(2);
+    document.getElementsByName("prestamos")[0].value = (p * 0.05).toFixed(2);
+    document.getElementsByName("infonavit")[0].value = (p * 0.05).toFixed(2);
+    document.getElementsByName("fonacot")[0].value = (p * 0.02).toFixed(2);
+    document.getElementsByName("cuota_sindical")[0].value = (p * 0.01).toFixed(2);
+}
 </script>
 
-</body>
 <?php include('../../Nav/footer.php'); ?>

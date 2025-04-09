@@ -44,11 +44,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $bono = $puntualidad * 0.05;
     $vales = $puntualidad * 0.03;
     $compensaciones = $puntualidad * 0.07;
-    $vacaciones = $puntualidad * 0.06;
     $prima_antiguedad = $puntualidad * 0.02;
 
-    $stmt = $conn->prepare("INSERT INTO percepciones (sueldo_base, puntualidad, asistencia, bono, vales_despensa, compensaciones, vacaciones, prima_antiguedad) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("dddddddd", $sueldo_base, $puntualidad, $asistencia, $bono, $vales, $compensaciones, $vacaciones, $prima_antiguedad);
+    $stmt = $conn->prepare("INSERT INTO percepciones (sueldo_base, puntualidad, asistencia, bono, vales_despensa, compensaciones, prima_antiguedad) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("dddddddd", $sueldo_base, $puntualidad, $asistencia, $bono, $vales, $compensaciones, $prima_antiguedad);
     $stmt->execute();
     $id_percepcion = $stmt->insert_id;
     $stmt->close();

@@ -50,7 +50,6 @@ asistencia NUMERIC(10,2) NOT NULL,
 bono NUMERIC(10,2),
 vales_despensa NUMERIC(10,2),
 compensaciones NUMERIC(10,2),
-vacaciones NUMERIC(10,2),
 prima_antiguedad NUMERIC(10,2)
 );
 

@@ -2,88 +2,88 @@
 include('../BD/ConexionBD.php');
 include('../Nav/header.php');
 
-// Verificar conexión
-if (!$conn) {
-    die("Error de conexión: " . mysqli_connect_error());
-}
 
-// Consulta SQL actualizada (asegúrate que los campos existen en tu nueva BD)
-$sql = "
-    SELECT 
-        n.id_nomina,
-        p.nom_persona AS Nombre,
-        p.apellido_paterno AS Apellido_Paterno,
-        p.apellido_materno AS Apellido_Materno,
-        n.fecha_nomina,
-        n.periodo_inicio,
-        n.periodo_final,
-        n.dias_total as dias_pagados,
-
-        -- Percepciones
-        (pr.sueldo_base + pr.puntualidad + pr.asistencia + 
-         IFNULL(pr.bono, 0) + IFNULL(pr.vales_despensa, 0) + 
-         IFNULL(pr.compensaciones, 0) + IFNULL(pr.vacaciones, 0) + 
-         IFNULL(pr.prima_antiguedad, 0)) AS total_percepciones,
-
-        -- Deducciones
-        (d.isr + d.imss + d.caja_ahorro + 
-         d.prestamos + d.infonavit + 
-         d.fonacot + d.cuota_sindical) AS total_deducciones
-
-    FROM nomina n
-    INNER JOIN persona p ON n.id_persona = p.id_persona
-    INNER JOIN percepciones pr ON n.id_percepcion = pr.id_percepcion
-    INNER JOIN deducciones d ON n.id_deducciones = d.id_deducciones
+$query = "
+SELECT 
+    n.id_nomina,
+    p.rfc,
+    per.sueldo_base,
+    per.puntualidad,
+    per.asistencia,
+    per.bono,
+    per.vales_despensa,
+    per.compensaciones,
+    per.prima_antiguedad,
+    d.isr,
+    d.imss,
+    d.caja_ahorro,
+    d.prestamos,
+    d.infonavit,
+    d.fonacot,
+    d.cuota_sindical,
+    n.dias_trabajados,
+    n.dias_justificados,
+    n.dias_total,
+    n.periodo_inicio,
+    n.periodo_final
+FROM nomina n
+JOIN persona p ON n.id_persona = p.id_persona
+JOIN percepciones per ON n.id_percepcion = per.id_percepcion
+JOIN deducciones d ON n.id_deducciones = d.id_deducciones
 ";
 
-$result = $conn->query($sql);
-
-// Verificar si la consulta fue exitosa
-if (!$result) {
-    die("Error en la consulta: " . $conn->error);
-}
+$resultado = $conn->query($query);
 ?>
 
 <body>
-    <h1 class="titulo">Registro de Nómina</h1>
-    <br>
+    <h1 class="titulo">Lista de Nóminas</h1>
     <table class='tabla'>
         <thead>
             <tr class='cont'>
-                <th>ID Nómina</th>
-                <th>Nombre</th>
-                <th>Apellido Paterno</th>
-                <th>Apellido Materno</th>
-                <th>Fecha Nómina</th>
-                <th>Inicio del Periodo</th>
-                <th>Final del Periodo</th>
+                <th>RFC</th>
+                <th>Periodo</th>
+                <th>Días Trabajados</th>
+                <th>Días Justificados</th>
                 <th>Días Pagados</th>
-                <th>Total Percepciones</th>
-                <th>Total Deducciones</th>
+                <th>Sueldo Base</th>
+                <th>Puntualidad</th>
+                <th>ISR</th>
+                <th>IMSS</th>
+                <th>Total a Pagar</th>
                 <th>Editar</th>
                 <th>Eliminar</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            <?php while ($fila = $result->fetch_assoc()) : ?>
+            <?php while ($row = $resultado->fetch_assoc()): 
+                $total_percepciones = $row['sueldo_base'] + $row['puntualidad'] + $row['asistencia'] + $row['bono'] + $row['vales_despensa'] + $row['compensaciones'] + $row['prima_antiguedad'];
+                $total_deducciones = $row['isr'] + $row['imss'] + $row['caja_ahorro'] + $row['prestamos'] + $row['infonavit'] + $row['fonacot'] + $row['cuota_sindical'];
+                $total_pagar = $total_percepciones - $total_deducciones;
+            ?>
                 <tr>
-                    <td><?= htmlspecialchars($fila['id_nomina']) ?></td>
-                    <td><?= htmlspecialchars($fila['Nombre']) ?></td>
-                    <td><?= htmlspecialchars($fila['Apellido_Paterno']) ?></td>
-                    <td><?= htmlspecialchars($fila['Apellido_Materno']) ?></td>
-                    <td><?= htmlspecialchars($fila['fecha_nomina']) ?></td>
-                    <td><?= htmlspecialchars($fila['periodo_inicio']) ?></td>
-                    <td><?= htmlspecialchars($fila['periodo_final']) ?></td>
-                    <td><?= htmlspecialchars($fila['dias_pagados']) ?></td>
-                    <td>$<?= number_format($fila['total_percepciones'], 2) ?></td>
-                    <td>$<?= number_format($fila['total_deducciones'], 2) ?></td>
-                    <td><a href='Editar/Modificar.php?id_nomina=<?= urlencode($fila['id_nomina']) ?>' class='editar'>Editar</a></td>
-                    <td><a href='Eliminar_N/Eliminar_N.php?id_nomina=<?= urlencode($fila['id_nomina']) ?>' class='eliminar' onclick="return confirm('¿Estás seguro de eliminar esta nómina?');">Eliminar</a></td>
+                    <td><?= $row['rfc'] ?></td>
+                    <td><?= $row['periodo_inicio'] ?> a <?= $row['periodo_final'] ?></td>
+                    <td><?= $row['dias_trabajados'] ?></td>
+                    <td><?= $row['dias_justificados'] ?></td>
+                    <td><?= $row['dias_total'] ?></td>
+                    <td>$<?= number_format($row['sueldo_base'], 2) ?></td>
+                    <td>$<?= number_format($row['puntualidad'], 2) ?></td>
+                    <td>$<?= number_format($row['isr'], 2) ?></td>
+                    <td>$<?= number_format($row['imss'], 2) ?></td>
+                    <td><strong>$<?= number_format($total_pagar, 2) ?></strong></td>
+                    <td><a href='Editar/Modificar.php?id_nomina=<?= urlencode($row['id_nomina']) ?>' class='editar'>Editar</a></td>
+                    <td><a href='Eliminar_N/Eliminar_N.php?id_nomina=<?= urlencode($row['id_nomina']) ?>' class='eliminar' onclick="return confirm('¿Estás seguro de eliminar esta nómina?');">Eliminar</a></td>
+                    <td>
+                        <form method="post" action="PDF/GenerarPDF_Nomina.php" target="_blank">
+                            <input type="hidden" name="id_nomina" value="<?= $row['id_nomina'] ?>">
+                            <button type="submit">Calcular Nómina</button>
+                        </form>
+                    </td>
                 </tr>
             <?php endwhile; ?>
-        </tbody>
+        </tbody>    
     </table>
 </body>
-
+<a href="../Usuario.php" class="regresar">Regresar</a>
 <?php include('../Nav/footer.php'); ?>
-</html>
