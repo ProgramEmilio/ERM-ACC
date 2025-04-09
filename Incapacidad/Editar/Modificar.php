@@ -23,7 +23,7 @@ $datos = $result->fetch_assoc();
 <body>
 <h1 class="titulo">Modificar Incapacidad</h1>
 
-<form class="form_reg_usuario" action="Editar_U.php" method="POST" oninput="calcularDias()">
+<form class="form_reg_usuario" action="Editar_I.php" method="POST" oninput="calcularDias()">
     <input type="hidden" name="id_incapacidad" value="<?= $datos['id_incapacidad'] ?>">
     <input type="hidden" name="id_persona" value="<?= $datos['id_persona'] ?>">
 
@@ -63,7 +63,7 @@ $datos = $result->fetch_assoc();
     <input type="submit" value="Guardar Cambios">
 </form>
 
-<a href="../ListaIncapacidades.php" class="regresar">Regresar</a>
+<a href="../Incapacidades.php" class="regresar">Regresar</a>
 
 <script>
 function calcularDias() {

@@ -194,6 +194,7 @@ function actualizarDatos() {
     document.getElementsByName("fonacot")[0].value = (p * 0.02).toFixed(2);
     document.getElementsByName("cuota_sindical")[0].value = (p * 0.01).toFixed(2);
 }
+actualizarDatos();
 </script>
 
 <?php include('../../Nav/footer.php'); ?>

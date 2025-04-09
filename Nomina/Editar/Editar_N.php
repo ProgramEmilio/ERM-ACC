@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $periodo_inicio = $_POST['periodo_inicio'];
     $periodo_final = $_POST['periodo_final'];
     $dias_trabajados = (int) $_POST['dias_trabajados'];
+    $dias_justificados = (int) $_POST['dias_justificados'];
     $dias_total = (float) $_POST['dias_total'];
 
     // Tabla percepciones
@@ -48,13 +49,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Actualizar nomina
     $sql_nomina = "UPDATE nomina SET 
-        periodo_inicio = ?, 
-        periodo_final = ?, 
-        dias_trabajados = ?, 
-        dias_total = ? 
-        WHERE id_nomina = ?";
+    periodo_inicio = ?, 
+    periodo_final = ?, 
+    dias_trabajados = ?,
+    dias_justificados = ?,
+    dias_total = ? 
+    WHERE id_nomina = ?";
     $stmt_nomina = $conn->prepare($sql_nomina);
-    $stmt_nomina->bind_param("ssidi", $periodo_inicio, $periodo_final, $dias_trabajados, $dias_total, $id_nomina);
+    $stmt_nomina->bind_param("ssiiii", $periodo_inicio, $periodo_final, $dias_trabajados, $dias_justificados, $dias_total, $id_nomina);
     $stmt_nomina->execute();
 
     // Actualizar percepciones
