@@ -23,6 +23,41 @@ $stmt->execute();
 $result = $stmt->get_result();
 $data = $result->fetch_assoc();
 
+// Paso 1: Obtener periodo_inicio, periodo_final e id_persona desde la tabla nomina
+$stmt = $conn->prepare("
+    SELECT periodo_inicio, periodo_final, id_persona
+    FROM nomina
+    WHERE id_nomina = ?
+");
+$stmt->bind_param("i", $id_nomina);
+$stmt->execute();
+$stmt->bind_result($periodo_inicio, $periodo_final, $id_persona);
+$stmt->fetch();
+$stmt->close();
+
+// Paso 2: Obtener días justificados dentro de ese rango
+$stmt = $conn->prepare("
+    SELECT SUM(DATEDIFF(
+        LEAST(fecha_final, ?), 
+        GREATEST(fecha_inicio, ?)
+    ) + 1) AS dias_justificados
+    FROM incapacidad
+    WHERE id_persona = ?
+    AND estatus = 'Activo'
+    AND fecha_final >= ? 
+    AND fecha_inicio <= ?
+");
+$stmt->bind_param("ssiss", $periodo_final, $periodo_inicio, $id_persona, $periodo_inicio, $periodo_final);
+$stmt->execute();
+$stmt->bind_result($dias_justificados);
+$stmt->fetch();
+$stmt->close();
+
+$dias_justificados = $dias_justificados ?: 0;
+
+
+
+
 if (!$data) {
     echo "Registro de nómina no encontrado.";
     exit;
@@ -48,7 +83,7 @@ if (!$data) {
     <input type="date" name="periodo_final" id="periodo_final" value="<?= $data['periodo_final'] ?>" readonly><br><br>
 
     <label for="dias_justificados">Días Justificados:</label>
-    <input type="number" name="dias_justificados" id="dias_justificados" value="<?= $data['dias_justificados'] ?>" readonly><br><br>
+    <input type="number" name="dias_justificados" id="dias_justificados" value="<?= $dias_justificados ?>" readonly><br><br>
 
     <label for="dias_pagados">Días Trabajados:</label>
     <select name="dias_trabajados" id="dias_trabajados" required onchange="actualizarDatos()">
@@ -112,7 +147,7 @@ if (!$data) {
     <input type="submit" value="Guardar Cambios">
 </form>
 
-<a href="../Usuario.php" class="regresar">Regresar</a>
+<a href="../Nomina.php" class="regresar">Regresar</a>
 
 <script>
 function actualizarPeriodoFinal() {

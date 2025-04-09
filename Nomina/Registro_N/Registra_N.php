@@ -14,9 +14,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->fetch();
     $stmt->close();
 
-    // Calcular días justificados (sumar incapacidades activas en el período)
-    $stmt = $conn->prepare("SELECT SUM(total_dias) FROM incapacidad WHERE id_persona = ? AND estatus = 'Activo'");
-    $stmt->bind_param("i", $id_persona);
+    // Calcular periodo final (14 días después del inicio)
+    $periodo_final = date('Y-m-d', strtotime($periodo_inicio . ' + 14 days'));
+
+    // Calcular días justificados en el período (usando fechas de incapacidad activas)
+    $stmt = $conn->prepare("
+        SELECT SUM(DATEDIFF(
+            LEAST(fecha_final, ?), 
+            GREATEST(fecha_inicio, ?)
+        ) + 1) AS dias_justificados
+        FROM incapacidad
+        WHERE id_persona = ?
+        AND estatus = 'Activo'
+        AND fecha_final >= ? 
+        AND fecha_inicio <= ?
+    ");
+    $stmt->bind_param("ssiss", $periodo_final, $periodo_inicio, $id_persona, $periodo_inicio, $periodo_final);
     $stmt->execute();
     $stmt->bind_result($dias_justificados);
     $stmt->fetch();
@@ -26,17 +39,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Total días pagados
     $dias_pagados = $dias_trabajados + $dias_justificados;
 
-    // ⚠️ Validación: días pagados no deben superar 15
+    // Validación: no más de 15 días pagados
     if ($dias_pagados > 15) {
         echo "<script>alert('Error: La suma de días trabajados e incapacidades no puede superar 15 días.'); window.history.back();</script>";
         exit;
     }
 
-    // Fecha actual y final
+    // Fecha actual de la nómina
     $fecha_nomina = date("Y-m-d");
-    $periodo_final = date('Y-m-d', strtotime($periodo_inicio . ' + 14 days'));
 
-    // Puntualidad = (dias_pagados * sueldo_base) / 15
+    // Puntualidad = proporcional al sueldo base
     $puntualidad = ($dias_pagados * $sueldo_base) / 15;
 
     // Calcular percepciones
@@ -46,8 +58,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $compensaciones = $puntualidad * 0.07;
     $prima_antiguedad = $puntualidad * 0.02;
 
-    $stmt = $conn->prepare("INSERT INTO percepciones (sueldo_base, puntualidad, asistencia, bono, vales_despensa, compensaciones, prima_antiguedad) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("dddddddd", $sueldo_base, $puntualidad, $asistencia, $bono, $vales, $compensaciones, $prima_antiguedad);
+    $stmt = $conn->prepare("INSERT INTO percepciones (sueldo_base, puntualidad, asistencia, bono, vales_despensa, compensaciones, prima_antiguedad) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ddddddd", $sueldo_base, $puntualidad, $asistencia, $bono, $vales, $compensaciones, $prima_antiguedad);
     $stmt->execute();
     $id_percepcion = $stmt->insert_id;
     $stmt->close();
