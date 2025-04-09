@@ -64,7 +64,7 @@ if (!$data) {
 }
 ?>
 
-<h1 class="titulo">Modificar Nómina</h1>
+<h1 class="titulo">Información de Nómina</h1>
 
 <form class="form_reg_usuario" action="Editar_N.php" method="POST">
     <input type="hidden" name="id_nomina" value="<?= $data['id_nomina'] ?>">

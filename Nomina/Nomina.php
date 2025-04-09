@@ -50,7 +50,7 @@ $resultado = $conn->query($query);
                 <th>ISR</th>
                 <th>IMSS</th>
                 <th>Total a Pagar</th>
-                <th>Editar</th>
+                <th>Información Avanzada</th>
                 <th>Eliminar</th>
                 <th>Acciones</th>
             </tr>
@@ -72,7 +72,7 @@ $resultado = $conn->query($query);
                     <td>$<?= number_format($row['isr'], 2) ?></td>
                     <td>$<?= number_format($row['imss'], 2) ?></td>
                     <td><strong>$<?= number_format($total_pagar, 2) ?></strong></td>
-                    <td><a href='Editar/Modificar.php?id_nomina=<?= urlencode($row['id_nomina']) ?>' class='editar'>Editar</a></td>
+                    <td><a href='Editar/Modificar.php?id_nomina=<?= urlencode($row['id_nomina']) ?>' class='editar'>Inf. Avanzada</a></td>
                     <td><a href='Eliminar_N/Eliminar_N.php?id_nomina=<?= urlencode($row['id_nomina']) ?>' class='eliminar' onclick="return confirm('¿Estás seguro de eliminar esta nómina?');">Eliminar</a></td>
                     <td>
                         <form method="post" action="PDF/GenerarPDF_Nomina.php" target="_blank">
