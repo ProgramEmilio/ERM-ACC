@@ -37,7 +37,7 @@ if (!$result) {
 ?>
 
 <body>
-    <h1 class="titulo">Información de Usuarios</h1>
+    <h1 class="titulo">Información de Empleados</h1>
     <br>
     <table class='tabla'>
         <thead>
@@ -52,7 +52,7 @@ if (!$result) {
                 <th>Departamento</th>
                 <th>Modo de Pago</th>
                 <th>Sueldo</th>
-                <th>Inf. Avanzada</th>
+                <th>Editar</th>
                 <th>Eliminar</th>
             </tr>
         </thead>
@@ -69,7 +69,7 @@ if (!$result) {
                     <td><?= htmlspecialchars($fila['Departamento']) ?></td>
                     <td><?= htmlspecialchars($fila['modo_Pago']) ?></td>
                     <td>$<?= number_format($fila['sueldo'], 2) ?></td>
-                    <td><a href='Editar/Modificar.php?id_usuario=<?= htmlspecialchars($fila['id_usuario']) ?>' class='editar'>Avanzada</a></td>
+                    <td><a href='Editar/Modificar.php?id_usuario=<?= htmlspecialchars($fila['id_usuario']) ?>' class='editar'>Editar</a></td>
                     <td><a href='Eliminar/Eliminar_Usuario.php?id_usuario=<?= htmlspecialchars($fila['id_usuario']) ?>' class='eliminar'>Eliminar</a></td>
                 </tr>
             <?php endwhile; ?>
