@@ -19,22 +19,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Calcular días justificados en el período (usando fechas de incapacidad activas)
     $stmt = $conn->prepare("
-        SELECT SUM(DATEDIFF(
-            LEAST(fecha_final, ?), 
+    SELECT SUM(
+        DATEDIFF(
+            LEAST(fecha_final, ?) ,
             GREATEST(fecha_inicio, ?)
-        ) + 1) AS dias_justificados
-        FROM incapacidad
-        WHERE id_persona = ?
-        AND estatus = 'Activo'
-        AND fecha_final >= ? 
-        AND fecha_inicio <= ?
+        ) + 1
+    ) AS dias_justificados
+    FROM incapacidad
+    WHERE id_persona = ?
+    AND estatus = 'Activo'
+    AND fecha_inicio <= ?
+    AND fecha_final >= ?
     ");
-    $stmt->bind_param("ssiss", $periodo_final, $periodo_inicio, $id_persona, $periodo_inicio, $periodo_final);
+    $stmt->bind_param("ssiss", $periodo_final, $periodo_inicio, $id_persona, $periodo_final, $periodo_inicio);
     $stmt->execute();
     $stmt->bind_result($dias_justificados);
     $stmt->fetch();
     $stmt->close();
     $dias_justificados = $dias_justificados ?: 0;
+
 
     // Total días pagados
     $dias_pagados = $dias_trabajados + $dias_justificados;
@@ -49,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $fecha_nomina = date("Y-m-d");
 
     // Puntualidad = proporcional al sueldo base
-    $puntualidad = ($dias_pagados * $sueldo_base) / 15;
+    $puntualidad = ($dias_trabajados * $sueldo_base) / 15;
 
     // Calcular percepciones
     $asistencia = $puntualidad * 0.1;
