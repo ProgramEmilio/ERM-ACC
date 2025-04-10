@@ -16,8 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fecha2 = new DateTime($fecha_final);
     $total_dias = $fecha1->diff($fecha2)->days + 1;
 
-    if ($total_dias > 15) {
-        echo "Error: El máximo de días permitidos por incapacidad es 15.";
+    if ($total_dias > 86) {
+        echo "Error: El máximo de días permitidos por incapacidad es 86.";
         exit;
     }
 
