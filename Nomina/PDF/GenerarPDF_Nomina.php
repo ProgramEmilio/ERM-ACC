@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id_nomina'])) {
     }
 
     $pdf->SetXY(20, 20);
-    $pdf->SetFont('Arial', 'B', 16);
+    $pdf->SetFont('Arial', 'B', 20);
     $pdf->SetTextColor(...$colorTitulo);
     $pdf->Cell(0, 10, utf8_decode('REPORTE DE NÓMINA'), 0, 1, 'C');
     $pdf->Ln(15);
@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id_nomina'])) {
     $pdf->Cell(95, 8, 'CURP: ' . $datos['curp'], 0, 0);
     $pdf->Cell(95, 8, utf8_decode('Teléfono: ' . $datos['telefono']), 0, 1);
     $pdf->Cell(95, 8, utf8_decode('Modo de Pago: ' . $datos['modo_pago']), 0, 1);
-    $pdf->Ln(1);
+    $pdf->Ln(2);
 
     // Sección: Periodo de Nómina
     $pdf->SetFont('Arial', 'B', 12);
@@ -76,108 +76,108 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id_nomina'])) {
     $pdf->Cell(95, 8, utf8_decode('Fecha de Registro: ' . $datos['fecha_nomina']), 0, 0);
     $pdf->Cell(95, 8, utf8_decode('Días Trabajados: ' . $datos['dias_trabajados']), 0, 1);
     $pdf->Cell(95, 8, utf8_decode('Días Justificados: ' . $datos['dias_justificados']), 0, 1);
-    $pdf->Cell(95, 8, utf8_decode('Días Pagados: ' . $datos['dias_total']), 0, 1);
-    $pdf->Ln(3);
+    $pdf->Ln(2);
 
     // Percepciones y Deducciones
-    $puntualidad = $datos['puntualidad'];  // Asumo que este campo está en la base de datos, o puedes usar un valor fijo
+    $percepciones = ['sueldo_base', 'puntualidad', 'asistencia', 'bono', 'vales_despensa', 'compensaciones', 'prima_antiguedad'];
+    $deducciones = ['isr', 'imss', 'caja_ahorro', 'prestamos', 'infonavit', 'fonacot', 'cuota_sindical'];
+
+    // Porcentajes para percepciones
+    $porcentajes_percepciones = [
+        'sueldo_base' => '100%',
+        'puntualidad' => '5%',
+        'asistencia' => '3%',
+        'bono' => '10%',
+        'vales_despensa' => '5%',
+        'compensaciones' => '7%',
+        'prima_antiguedad' => '2%',
+    ];
+
+    // Porcentajes para deducciones
+    $porcentajes_deducciones = [
+        'isr' => '5%',
+        'imss' => '8%',
+        'caja_ahorro' => '3%',
+        'prestamos' => '2%',
+        'infonavit' => '5%',
+        'fonacot' => '1%',
+        'cuota_sindical' => '1%',
+    ];
+
+    // Calcular percepciones (excluyendo sueldo_base para sumarla explícitamente luego)
     $sueldo_base = $datos['sueldo_base'];
+    $otras_percepciones = array_filter($percepciones, fn($p) => $p !== 'sueldo_base');
+    $total_otras_percepciones = array_sum(array_map(fn($p) => $datos[$p], $otras_percepciones));
 
-    // Percepciones
-    $asistencia = $puntualidad * 0.10;
-    $bono = $puntualidad * 0.05;
-    $vales = $puntualidad * 0.03;
-    $compensaciones = $puntualidad * 0.07;
-    $prima_antiguedad = $puntualidad * 0.02;
+    // Total de percepciones (sueldo_base + otras)
+    $total_percepciones = $sueldo_base + $total_otras_percepciones;
 
-    $total_percepciones = $sueldo_base + $asistencia + $bono + $vales + $compensaciones + $prima_antiguedad;
-
-    // Mostrar percepciones
+    // Mostrar tabla de percepciones
     $pdf->SetFont('Arial', 'B', 12);
     $pdf->SetFillColor(...$colorPrimario);
-    $pdf->Cell(160, 8, 'Percepciones', 1, 1, 'C', true);
+    $pdf->Cell(0, 8, 'Percepciones', 1, 1, 'C', true);
 
     $pdf->SetFont('Arial', '', 11);
-    $pdf->Cell(130, 8, 'Sueldo Base (100%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($sueldo_base, 2), 1, 1, 'R');
-
-    $pdf->Cell(130, 8, 'Asistencia (10%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($asistencia, 2), 1, 1, 'R');
-
-    $pdf->Cell(130, 8, 'Bono (5%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($bono, 2), 1, 1, 'R');
-
-    $pdf->Cell(130, 8, 'Vales (3%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($vales, 2), 1, 1, 'R');
-
-    $pdf->Cell(130, 8, 'Compensaciones (7%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($compensaciones, 2), 1, 1, 'R');
-
-    $pdf->Cell(130, 8, 'Prima Antiguedad (2%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($prima_antiguedad, 2), 1, 1, 'R');
+    foreach ($percepciones as $p) {
+        $nombre = utf8_decode(ucwords(str_replace('_', ' ', $p)));
+        $monto = number_format($datos[$p], 2);
+        $porcentaje = isset($porcentajes_percepciones[$p]) ? ' (' . $porcentajes_percepciones[$p] . ')' : '';
+        $pdf->Cell(150, 8, $nombre . $porcentaje, 1);
+        $pdf->Cell(40, 8, '$' . $monto, 1, 1, 'R');
+    }
 
     $pdf->SetFont('Arial', 'B', 11);
     $pdf->SetFillColor(230, 230, 230); // gris claro
-    $pdf->Cell(130, 8, 'Total Percepciones', 1, 0, 'L', true);
-    $pdf->Cell(30, 8, '$' . number_format($total_percepciones, 2), 1, 1, 'R', true);
+    $pdf->Cell(150, 8, 'Total Percepciones', 1, 0, 'L', true);
+    $pdf->Cell(40, 8, '$' . number_format($total_percepciones, 2), 1, 1, 'R', true);
 
-    $pdf->Ln(4);
+    // Espacio entre tablas
+    $pdf->Ln(2);
 
     // Deducciones
-    $isr = $puntualidad * 0.12;
-    $imss = $puntualidad * 0.08;
-    $caja = $puntualidad * 0.05;
-    $prestamos = $puntualidad * 0.04;
-    $infonavit = $puntualidad * 0.06;
-    $fonacot = $puntualidad * 0.03;
-    $sindicato = $puntualidad * 0.01;
-
-    $total_deducciones = $isr + $imss + $caja + $prestamos + $infonavit + $fonacot + $sindicato;
-
-    // Mostrar deducciones
     $pdf->SetFont('Arial', 'B', 12);
     $pdf->SetFillColor(...$colorPrimario);
-    $pdf->Cell(160, 8, 'Deducciones', 1, 1, 'C', true);
+    $pdf->Cell(0, 8, 'Deducciones', 1, 1, 'C', true);
 
     $pdf->SetFont('Arial', '', 11);
-    $pdf->Cell(130, 8, 'ISR (12%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($isr, 2), 1, 1, 'R');
+    foreach ($deducciones as $d) {
+        $nombre = utf8_decode(ucwords(str_replace('_', ' ', $d)));
+        $monto = number_format($datos[$d], 2);
+        $porcentaje = isset($porcentajes_deducciones[$d]) ? ' (' . $porcentajes_deducciones[$d] . ')' : '';
+        $pdf->Cell(150, 8, $nombre . $porcentaje, 1);
+        $pdf->Cell(40, 8, '$' . $monto, 1, 1, 'R');
+    }
 
-    $pdf->Cell(130, 8, 'IMSS (8%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($imss, 2), 1, 1, 'R');
-
-    $pdf->Cell(130, 8, 'Caja (5%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($caja, 2), 1, 1, 'R');
-
-    $pdf->Cell(130, 8, 'Prestamos (4%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($prestamos, 2), 1, 1, 'R');
-
-    $pdf->Cell(130, 8, 'Infonavit (6%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($infonavit, 2), 1, 1, 'R');
-
-    $pdf->Cell(130, 8, 'Fonacot (3%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($fonacot, 2), 1, 1, 'R');
-
-    $pdf->Cell(130, 8, 'Sindicato (1%)', 1);
-    $pdf->Cell(30, 8, '$' . number_format($sindicato, 2), 1, 1, 'R');
-
+    $total_deducciones = array_sum(array_map(fn($d) => $datos[$d], $deducciones));
     $pdf->SetFont('Arial', 'B', 11);
     $pdf->SetFillColor(230, 230, 230); // gris claro
-    $pdf->Cell(130, 8, 'Total Deducciones', 1, 0, 'L', true);
-    $pdf->Cell(30, 8, '$' . number_format($total_deducciones, 2), 1, 1, 'R', true);
+    $pdf->Cell(150, 8, 'Total Deducciones', 1, 0, 'L', true);
+    $pdf->Cell(40, 8, '$' . number_format($total_deducciones, 2), 1, 1, 'R', true);
 
+    // Espacio antes del total neto
+    $pdf->Ln(2);
+
+    // Pago neto = Sueldo base + otras percepciones - deducciones
+    $total_neto = $sueldo_base + $total_otras_percepciones - $total_deducciones;
+    $pdf->SetFont('Arial', 'B', 14);
+    $pdf->SetFillColor(...$colorPrimario);
+    $pdf->Cell(190, 12, 'Pago Neto: $' . number_format($total_neto, 2), 1, 1, 'C', true);
+
+    // Sección de totales
     $pdf->Ln(5);
-
-    // Calcular salario neto
-    $salario_neto = $total_percepciones - $total_deducciones;
-
-    // Mostrar salario neto
     $pdf->SetFont('Arial', 'B', 12);
-    $pdf->SetFillColor(200, 255, 200); // verde claro
-    $pdf->Cell(130, 8, 'Salario Neto', 1, 0, 'L', true);
-    $pdf->Cell(30, 8, '$' . number_format($salario_neto, 2), 1, 1, 'R', true);
+    $pdf->SetFillColor(192, 192, 192); // Gris claro para la tabla de totales
+    $pdf->Cell(95, 8, 'Total Sueldo + Percepciones', 1, 0, 'L', true);
+    $pdf->Cell(40, 8, '$' . number_format($total_percepciones, 2), 1, 1, 'R');
 
-    // Salida PDF
-    $pdf->Output('I', 'Reporte_Nomina_' . $id_nomina . '.pdf');
+    $pdf->Cell(95, 8, 'Total Deducciones', 1, 0, 'L', true);
+    $pdf->Cell(40, 8, '$' . number_format($total_deducciones, 2), 1, 1, 'R');
+
+    $pdf->Cell(95, 8, 'Pago Neto Final', 1, 0, 'L', true);
+    $pdf->Cell(40, 8, '$' . number_format($total_neto, 2), 1, 1, 'R');
+
+    $nombre_archivo = 'Nomina_' . strtoupper($datos['rfc']) . '.pdf';
+    $pdf->Output('I', $nombre_archivo);
+    exit;
 }
 ?>
