@@ -23,7 +23,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $data = $result->fetch_assoc();
 
-// Obtener periodo_inicio, periodo_final e id_persona
+// Paso 1: Obtener periodo_inicio, periodo_final e id_persona desde la tabla nomina
 $stmt = $conn->prepare("
     SELECT periodo_inicio, periodo_final, id_persona
     FROM nomina
@@ -35,7 +35,7 @@ $stmt->bind_result($periodo_inicio, $periodo_final, $id_persona);
 $stmt->fetch();
 $stmt->close();
 
-// Calcular días justificados en el periodo
+// Paso 2: Obtener días justificados dentro de ese rango
 $stmt = $conn->prepare("
     SELECT SUM(DATEDIFF(
         LEAST(fecha_final, ?), 
@@ -55,13 +55,16 @@ $stmt->close();
 
 $dias_justificados = $dias_justificados ?: 0;
 
+
+
+
 if (!$data) {
     echo "Registro de nómina no encontrado.";
     exit;
 }
 ?>
 
-<h1 class="titulo">Editar Nómina</h1>
+<h1 class="titulo">Información de Nómina</h1>
 
 <form class="form_reg_usuario" action="Editar_N.php" method="POST">
     <input type="hidden" name="id_nomina" value="<?= $data['id_nomina'] ?>">
@@ -74,7 +77,7 @@ if (!$data) {
     <input type="date" name="fecha_nomina" value="<?= $data['fecha_nomina'] ?>" readonly><br><br>
 
     <label for="periodo_inicio">Periodo Inicio:</label>
-    <input type="date" name="periodo_inicio" id="periodo_inicio" value="<?= $data['periodo_inicio'] ?>" required onchange="actualizarPeriodoFinal(); actualizarDatos();"><br><br>
+    <input type="date" name="periodo_inicio" id="periodo_inicio" value="<?= $data['periodo_inicio'] ?>" required onchange="actualizarPeriodoFinal()"><br><br>
 
     <label for="periodo_final">Periodo Final:</label>
     <input type="date" name="periodo_final" id="periodo_final" value="<?= $data['periodo_final'] ?>" readonly><br><br>
@@ -82,7 +85,7 @@ if (!$data) {
     <label for="dias_justificados">Días Justificados:</label>
     <input type="number" name="dias_justificados" id="dias_justificados" value="<?= $dias_justificados ?>" readonly><br><br>
 
-    <label for="dias_trabajados">Días Trabajados:</label>
+    <label for="dias_pagados">Días Trabajados:</label>
     <select name="dias_trabajados" id="dias_trabajados" required onchange="actualizarDatos()">
         <option value="">Selecciona días</option>
         <?php for ($i = 1; $i <= 15; $i++): ?>
@@ -171,7 +174,7 @@ function actualizarDatos() {
 
     document.getElementById("dias_total").value = total;
 
-    const puntualidad = (dias * sueldoBase / 15).toFixed(2);
+    const puntualidad = (total * sueldoBase / 15).toFixed(2);
     document.getElementById("sueldo_base").value = sueldoBase.toFixed(2);
     document.getElementById("puntualidad").value = puntualidad;
 
