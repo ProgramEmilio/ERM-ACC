@@ -85,22 +85,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id_nomina'])) {
     // Porcentajes para percepciones
     $porcentajes_percepciones = [
         'sueldo_base' => '100%',
-        'puntualidad' => '5%',
-        'asistencia' => '3%',
-        'bono' => '10%',
-        'vales_despensa' => '5%',
-        'compensaciones' => '7%',
+        'puntualidad' => '2%',
+        'asistencia' => '10%',
+        'bono' => '5%',
+        'vales_despensa' => '8%',
+        'compensaciones' => '3%',
         'prima_antiguedad' => '2%',
     ];
 
     // Porcentajes para deducciones
     $porcentajes_deducciones = [
-        'isr' => '5%',
-        'imss' => '8%',
-        'caja_ahorro' => '3%',
-        'prestamos' => '2%',
+        'isr' => '16%',
+        'imss' => '3%',
+        'caja_ahorro' => '7%',
+        'prestamos' => '5%',
         'infonavit' => '5%',
-        'fonacot' => '1%',
+        'fonacot' => '2%',
         'cuota_sindical' => '1%',
     ];
 

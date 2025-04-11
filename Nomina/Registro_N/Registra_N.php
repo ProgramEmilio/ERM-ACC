@@ -55,11 +55,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $Sueldo_Calculado = ($dias_trabajados * $sueldo_base) / 15;
 
     // Calcular percepciones
-    $puntualidad = $Sueldo_Calculado * 0.2;
+    $puntualidad = $Sueldo_Calculado * 0.02;
     $asistencia = $Sueldo_Calculado * 0.1;
     $bono = $Sueldo_Calculado * 0.05;
-    $vales = $Sueldo_Calculado * 0.03;
-    $compensaciones = $Sueldo_Calculado * 0.07;
+    $vales = $Sueldo_Calculado * 0.08;
+    $compensaciones = $Sueldo_Calculado * 0.03;
     $prima_antiguedad = $Sueldo_Calculado * 0.02;
 
     $stmt = $conn->prepare("INSERT INTO percepciones (sueldo_base, puntualidad, asistencia, bono, vales_despensa, compensaciones, prima_antiguedad) VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -69,12 +69,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->close();
 
     // Calcular deducciones
-    $isr = $Sueldo_Calculado * 0.12;
-    $imss = $Sueldo_Calculado * 0.08;
-    $caja = $Sueldo_Calculado * 0.05;
-    $prestamos = $Sueldo_Calculado * 0.04;
-    $infonavit = $Sueldo_Calculado * 0.06;
-    $fonacot = $Sueldo_Calculado * 0.03;
+    $isr = $Sueldo_Calculado * 0.16;
+    $imss = $Sueldo_Calculado * 0.03;
+    $caja = $Sueldo_Calculado * 0.07;
+    $prestamos = $Sueldo_Calculado * 0.05;
+    $infonavit = $Sueldo_Calculado * 0.05;
+    $fonacot = $Sueldo_Calculado * 0.02;
     $sindicato = $Sueldo_Calculado * 0.01;
 
     $stmt = $conn->prepare("INSERT INTO deducciones (isr, imss, caja_ahorro, prestamos, infonavit, fonacot, cuota_sindical) VALUES (?, ?, ?, ?, ?, ?, ?)");

@@ -85,7 +85,7 @@ if (!$data) {
     <label for="dias_trabajados">Días Trabajados:</label>
     <select name="dias_trabajados" id="dias_trabajados" required onchange="actualizarDatos()">
         <option value="">Selecciona días</option>
-        <?php for ($i = 0; $i <= 15; $i++): ?>
+        <?php for ($i = 1; $i <= 15; $i++): ?>
             <option value="<?= $i ?>" <?= $data['dias_trabajados'] == $i ? 'selected' : '' ?>><?= $i ?></option>
         <?php endfor; ?>
     </select><br><br>
@@ -184,7 +184,7 @@ function actualizarDatos() {
 
     // Aplicar deducciones basadas en sueldo base
     document.getElementsByName("isr")[0].value = (sueldoBase * 0.16).toFixed(2);
-    document.getElementsByName("imss")[0].value = (sueldoBase * 0.02375).toFixed(2);
+    document.getElementsByName("imss")[0].value = (sueldoBase * 0.03).toFixed(2);
     document.getElementsByName("caja_ahorro")[0].value = (sueldoBase * 0.07).toFixed(2);
     document.getElementsByName("prestamos")[0].value = (sueldoBase * 0.05).toFixed(2);
     document.getElementsByName("infonavit")[0].value = (sueldoBase * 0.05).toFixed(2);
