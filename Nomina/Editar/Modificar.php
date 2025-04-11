@@ -151,13 +151,13 @@ function actualizarPeriodoFinal() {
     const inicio = document.getElementById('periodo_inicio').value;
     if (inicio) {
         const fechaInicio = new Date(inicio);
-        fechaInicio.setDate(fechaInicio.getDate() + 13);
+        fechaInicio.setDate(fechaInicio.getDate() + 14);
         document.getElementById('periodo_final').value = fechaInicio.toISOString().split('T')[0];
     }
 }
 
 function actualizarDatos() {
-    const sueldoBase = parseFloat(document.getElementById("sueldo_base_oculto").value) || 0;
+    const sueldoBruto = parseFloat(document.getElementById("sueldo_base_oculto").value) || 0;
     const dias = parseInt(document.getElementById("dias_trabajados").value) || 0;
     const justificados = parseInt(document.getElementById("dias_justificados").value) || 0;
     const total = dias + justificados;
@@ -171,27 +171,28 @@ function actualizarDatos() {
 
     document.getElementById("dias_total").value = total;
 
-    const puntualidad = (dias * sueldoBase / 15).toFixed(2);
-    document.getElementById("sueldo_base").value = sueldoBase.toFixed(2);
-    document.getElementById("puntualidad").value = puntualidad;
+    const sueldoBase = parseFloat((dias * sueldoBruto / 15).toFixed(2));
+    document.getElementById("sueldo_base").value = sueldoBase.toFixed(2); // Corregido
+    document.getElementById("puntualidad").value = (sueldoBase * 0.02).toFixed(2); // Puntualidad 2%
 
-    const p = parseFloat(puntualidad) || 0;
+    // Aplicar percepciones basadas en sueldo base
+    document.getElementsByName("asistencia")[0].value = (sueldoBase * 0.10).toFixed(2);
+    document.getElementsByName("bono")[0].value = (sueldoBase * 0.05).toFixed(2);
+    document.getElementsByName("vales_despensa")[0].value = (sueldoBase * 0.08).toFixed(2);
+    document.getElementsByName("compensaciones")[0].value = (sueldoBase * 0.03).toFixed(2);
+    document.getElementsByName("prima_antiguedad")[0].value = (sueldoBase * 0.02).toFixed(2);
 
-    document.getElementsByName("asistencia")[0].value = (p * 0.10).toFixed(2);
-    document.getElementsByName("bono")[0].value = (p * 0.05).toFixed(2);
-    document.getElementsByName("vales_despensa")[0].value = (p * 0.08).toFixed(2);
-    document.getElementsByName("compensaciones")[0].value = (p * 0.03).toFixed(2);
-    document.getElementsByName("prima_antiguedad")[0].value = (p * 0.02).toFixed(2);
-
-    document.getElementsByName("isr")[0].value = (p * 0.16).toFixed(2);
-    document.getElementsByName("imss")[0].value = (p * 0.02375).toFixed(2);
-    document.getElementsByName("caja_ahorro")[0].value = (p * 0.07).toFixed(2);
-    document.getElementsByName("prestamos")[0].value = (p * 0.05).toFixed(2);
-    document.getElementsByName("infonavit")[0].value = (p * 0.05).toFixed(2);
-    document.getElementsByName("fonacot")[0].value = (p * 0.02).toFixed(2);
-    document.getElementsByName("cuota_sindical")[0].value = (p * 0.01).toFixed(2);
+    // Aplicar deducciones basadas en sueldo base
+    document.getElementsByName("isr")[0].value = (sueldoBase * 0.16).toFixed(2);
+    document.getElementsByName("imss")[0].value = (sueldoBase * 0.02375).toFixed(2);
+    document.getElementsByName("caja_ahorro")[0].value = (sueldoBase * 0.07).toFixed(2);
+    document.getElementsByName("prestamos")[0].value = (sueldoBase * 0.05).toFixed(2);
+    document.getElementsByName("infonavit")[0].value = (sueldoBase * 0.05).toFixed(2);
+    document.getElementsByName("fonacot")[0].value = (sueldoBase * 0.02).toFixed(2);
+    document.getElementsByName("cuota_sindical")[0].value = (sueldoBase * 0.01).toFixed(2);
 }
 actualizarDatos();
 </script>
+
 
 <?php include('../../Nav/footer.php'); ?>

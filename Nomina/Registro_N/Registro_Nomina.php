@@ -24,13 +24,6 @@ $conn->close();
     <label for="periodo_inicio">Periodo Inicio:</label>
     <input type="date" name="periodo_inicio" required><br><br>
 
-    <label for="dias_trabajados">Días Trabajados:</label>
-    <select name="dias_trabajados" required>
-        <?php for($i = 1; $i <= 15; $i++): ?>
-            <option value="<?= $i ?>"><?= $i ?></option>
-        <?php endfor; ?>
-    </select><br><br>
-
     <input type="submit" value="Registrar Nómina">
 </form>
 

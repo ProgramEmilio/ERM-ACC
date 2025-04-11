@@ -4,7 +4,6 @@ include('../../BD/ConexionBD.php');
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $id_persona = $_POST['id_persona'];
     $periodo_inicio = $_POST['periodo_inicio'];
-    $dias_trabajados = (int)$_POST['dias_trabajados'];
 
     // Obtener sueldo base
     $stmt = $conn->prepare("SELECT sueldo FROM persona WHERE id_persona = ?");
@@ -38,6 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->close();
     $dias_justificados = $dias_justificados ?: 0;
 
+    $dias_trabajados = 15 - $dias_justificados;
 
     // Total días pagados
     $dias_pagados = $dias_trabajados + $dias_justificados;
@@ -51,30 +51,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Fecha actual de la nómina
     $fecha_nomina = date("Y-m-d");
 
-    // Puntualidad = proporcional al sueldo base
-    $puntualidad = ($dias_trabajados * $sueldo_base) / 15;
+    // Sueldo_Calculado = proporcional al sueldo base
+    $Sueldo_Calculado = ($dias_trabajados * $sueldo_base) / 15;
 
     // Calcular percepciones
-    $asistencia = $puntualidad * 0.1;
-    $bono = $puntualidad * 0.05;
-    $vales = $puntualidad * 0.03;
-    $compensaciones = $puntualidad * 0.07;
-    $prima_antiguedad = $puntualidad * 0.02;
+    $puntualidad = $Sueldo_Calculado * 0.2;
+    $asistencia = $Sueldo_Calculado * 0.1;
+    $bono = $Sueldo_Calculado * 0.05;
+    $vales = $Sueldo_Calculado * 0.03;
+    $compensaciones = $Sueldo_Calculado * 0.07;
+    $prima_antiguedad = $Sueldo_Calculado * 0.02;
 
     $stmt = $conn->prepare("INSERT INTO percepciones (sueldo_base, puntualidad, asistencia, bono, vales_despensa, compensaciones, prima_antiguedad) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ddddddd", $sueldo_base, $puntualidad, $asistencia, $bono, $vales, $compensaciones, $prima_antiguedad);
+    $stmt->bind_param("ddddddd", $Sueldo_Calculado, $puntualidad, $asistencia, $bono, $vales, $compensaciones, $prima_antiguedad);
     $stmt->execute();
     $id_percepcion = $stmt->insert_id;
     $stmt->close();
 
     // Calcular deducciones
-    $isr = $puntualidad * 0.12;
-    $imss = $puntualidad * 0.08;
-    $caja = $puntualidad * 0.05;
-    $prestamos = $puntualidad * 0.04;
-    $infonavit = $puntualidad * 0.06;
-    $fonacot = $puntualidad * 0.03;
-    $sindicato = $puntualidad * 0.01;
+    $isr = $Sueldo_Calculado * 0.12;
+    $imss = $Sueldo_Calculado * 0.08;
+    $caja = $Sueldo_Calculado * 0.05;
+    $prestamos = $Sueldo_Calculado * 0.04;
+    $infonavit = $Sueldo_Calculado * 0.06;
+    $fonacot = $Sueldo_Calculado * 0.03;
+    $sindicato = $Sueldo_Calculado * 0.01;
 
     $stmt = $conn->prepare("INSERT INTO deducciones (isr, imss, caja_ahorro, prestamos, infonavit, fonacot, cuota_sindical) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ddddddd", $isr, $imss, $caja, $prestamos, $infonavit, $fonacot, $sindicato);

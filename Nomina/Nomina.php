@@ -41,14 +41,9 @@ $resultado = $conn->query($query);
         <thead>
             <tr class='cont'>
                 <th>RFC</th>
-                <th>Periodo</th>
-                <th>Días Trabajados</th>
-                <th>Días Justificados</th>
-                <th>Días Pagados</th>
-                <th>Sueldo Base</th>
-                <th>Puntualidad</th>
-                <th>ISR</th>
-                <th>IMSS</th>
+                <th>Periodo Inicio</th>
+                <th>Periodo Final</th>
+                <th>Sueldo base</th>
                 <th>Total a Pagar</th>
                 <th>Información Avanzada</th>
                 <th>Eliminar</th>
@@ -63,14 +58,9 @@ $resultado = $conn->query($query);
             ?>
                 <tr>
                     <td><?= $row['rfc'] ?></td>
-                    <td><?= $row['periodo_inicio'] ?> a <?= $row['periodo_final'] ?></td>
-                    <td><?= $row['dias_trabajados'] ?></td>
-                    <td><?= $row['dias_justificados'] ?></td>
-                    <td><?= $row['dias_total'] ?></td>
+                    <td><?= $row['periodo_inicio'] ?></td>
+                    <td><?= $row['periodo_final'] ?></td>
                     <td>$<?= number_format($row['sueldo_base'], 2) ?></td>
-                    <td>$<?= number_format($row['puntualidad'], 2) ?></td>
-                    <td>$<?= number_format($row['isr'], 2) ?></td>
-                    <td>$<?= number_format($row['imss'], 2) ?></td>
                     <td><strong>$<?= number_format($total_pagar, 2) ?></strong></td>
                     <td><a href='Editar/Modificar.php?id_nomina=<?= urlencode($row['id_nomina']) ?>' class='editar'>Inf. Avanzada</a></td>
                     <td><a href='Eliminar_N/Eliminar_N.php?id_nomina=<?= urlencode($row['id_nomina']) ?>' class='eliminar' onclick="return confirm('¿Estás seguro de eliminar esta nómina?');">Eliminar</a></td>
