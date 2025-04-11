@@ -85,7 +85,7 @@ if (!$data) {
     <label for="dias_trabajados">Días Trabajados:</label>
     <select name="dias_trabajados" id="dias_trabajados" required onchange="actualizarDatos()">
         <option value="">Selecciona días</option>
-        <?php for ($i = 1; $i <= 15; $i++): ?>
+        <?php for ($i = 0; $i <= 15; $i++): ?>
             <option value="<?= $i ?>" <?= $data['dias_trabajados'] == $i ? 'selected' : '' ?>><?= $i ?></option>
         <?php endfor; ?>
     </select><br><br>
